@@ -86,6 +86,7 @@ class TodoList {
             let id = elemParentTarget.dataset.id
             if (e.target.className === 'set-status') {
                 this.changeComplited(url, id)
+
             } else if (e.target.className === 'delete-task') {
                 this.deleteTask(url, id)
                 elemParentTarget.remove()
@@ -108,7 +109,6 @@ class TodoList {
     async showTodos(url) {
         try {
             let data = await getJSON(url)
-            console.log(data)
             todo1.render(data)
         } catch (err) {
             console.log(err)
@@ -142,7 +142,6 @@ class TodoList {
             console.log(err)
         }
     }
-
 }
 
 class Task {
@@ -170,6 +169,7 @@ form.addEventListener('click', function (e) {
             let json = JSON.stringify(new Task())
             task.addNewTask(url, json)
             input.value = ''
+            e.preventDefault();
         }
     }
 })
