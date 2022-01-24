@@ -1,0 +1,40 @@
+.no-active {
+    background-color: yellow;
+}
+
+.active {
+    background-color: #0bef0b;
+}
+
+#btn {
+    padding: 5px 15px;
+}
+
+#input {
+    margin: 50px 20px 0 40%;
+    padding: 5px 20px;
+
+}
+
+ul {
+    width: 700px;
+    margin: 20px auto;
+}
+
+li {
+    padding: 10px;
+    position: relative;
+    border: 1px solid grey;
+    margin: 10px;
+    background-color: yellow;
+}
+
+.set-status {
+    position: absolute;
+    right: 60px;
+}
+
+.delete-task {
+    position: absolute;
+    right: 0;
+}
