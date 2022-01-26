@@ -99,7 +99,6 @@ class Task {
                 console.log(err)
             }
         });
-
     }
 }
 
