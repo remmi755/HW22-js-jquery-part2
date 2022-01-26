@@ -22,7 +22,10 @@ class TodoList {
         let task = await $.ajax($url + "/" + id)
             .done(function (data) {
                 todo1.changeStatus(data)
-            });
+            })
+            .fail(function (err) {
+                console.log("error", err);
+            })
         await $.ajax({
             type: "PUT",
             url: $url + "/" + id,
@@ -32,9 +35,7 @@ class TodoList {
             .done(function (data) {
                 todo1.render(data)
             })
-            .fail(function (err) {
-                console.log("error", err);
-            })
+
     }
 
     showTodos(url) {
