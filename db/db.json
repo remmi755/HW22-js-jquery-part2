@@ -12,18 +12,8 @@
     },
     {
       "task": "buy sugar",
-      "complited": false,
+      "complited": "false",
       "id": 3
-    },
-    {
-      "task": "1223",
-      "complited": false,
-      "id": 4
-    },
-    {
-      "task": "hhhhh",
-      "complited": false,
-      "id": 5
     }
   ]
 }

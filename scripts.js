@@ -1,118 +1,52 @@
-let getJSON = function (url) {
-    return new Promise(function (resolve, reject) {
-        let xhr = new XMLHttpRequest();
-        xhr.open('get', url, true);
-        xhr.responseType = 'json';
-        xhr.onload = function () {
-            let status = xhr.status;
-            if (status === 200) {
-                resolve(xhr.response);
-            } else {
-                reject(status);
-            }
-        };
-        xhr.send();
-    });
-};
-
-let saveJSON = function (url, data) {
-    return new Promise(function (resolve, reject) {
-        let xhr = new XMLHttpRequest();
-        xhr.open('post', url, true);
-        xhr.setRequestHeader(
-            'Content-type', 'application/json; charset=utf-8'
-        );
-        xhr.responseType = 'json';
-        xhr.onload = function () {
-            let status = xhr.status;
-            resolve(xhr.response);
-        };
-        xhr.onerror = function (e) {
-            reject("Error fetching " + url);
-        };
-        xhr.send(data);
-    });
-};
-
-let changeJSON = function (url, data) {
-    return new Promise(function (resolve, reject) {
-        let xhr = new XMLHttpRequest();
-        xhr.open('put', url, true);
-        xhr.setRequestHeader(
-            'Content-type', 'application/json; charset=utf-8'
-        );
-        xhr.responseType = 'json';
-        xhr.onload = function () {
-            let status = xhr.status;
-            resolve(xhr.response);
-        };
-        xhr.onerror = function (e) {
-            reject("Error fetching " + url);
-        };
-        xhr.send(data);
-    });
-};
-
-let deleteJSON = function (url, data) {
-    return new Promise(function (resolve, reject) {
-        let xhr = new XMLHttpRequest();
-        xhr.open('delete', url, true);
-        xhr.setRequestHeader(
-            'Content-type', 'application/json; charset=utf-8'
-        );
-        xhr.responseType = 'json';
-        xhr.onload = function () {
-            let status = xhr.status;
-            resolve(xhr.response);
-        };
-        xhr.onerror = function (e) {
-            reject("Error fetching " + url);
-        };
-        xhr.send(data);
-    });
-};
-
-let list = document.getElementById('list');
-let btnCreate = document.getElementById('btn')
-let input = document.getElementById('input')
-let form = document.getElementById('form')
-let url = 'http://localhost:3000/todos'
+let $list = $('#list');
+let $input = $('#input')
+let $btn = $('#btn')
+let $url = 'http://localhost:3000/todos'
 
 class TodoList {
     constructor(el) {
         this.el = el;
-        el.addEventListener('click', (e) => {
-            let elemParentTarget = e.target.closest('li')
-            let id = elemParentTarget.dataset.id
-            if (e.target.className === 'set-status') {
-                this.changeComplited(url, id)
-
-            } else if (e.target.className === 'delete-task') {
-                this.deleteTask(url, id)
-                elemParentTarget.remove()
+        $list.on('click', 'li', (e) => {
+            let $elemParentTarget = $(e.target.closest('li'))
+            let id = $elemParentTarget.data('id')
+            if ($(e.target).hasClass('set-status')) {
+                todo1.changeComplited($url, id)
+            } else if ($(e.target).hasClass('delete-task')) {
+                todo1.deleteTask($url, id)
+                $elemParentTarget.remove()
             }
         })
     }
 
-    async changeComplited(url, id) {
-        try {
-            let result = await getJSON(url + "/" + id)
-            let newResult = await todo1.changeStatus(result)
-            await changeJSON(url + "/" + id, JSON.stringify(newResult))
-            let data = await getJSON(url)
-            await todo1.render(data)
-        } catch (err) {
-            console.log(err)
-        }
+    changeComplited(url, id) {
+        $.ajax($url + "/" + id)
+            .done(function (data) {
+                todo1.changeStatus(data)
+                $.ajax({
+                    type: "PUT",
+                    url: $url + "/" + id,
+                    data: data,
+                    success: function (data) {
+                        $.ajax($url)
+                            .done(function (data) {
+                                todo1.render(data)
+                            })
+                    },
+                    error: function (err) {
+                    }
+                });
+            });
+
     }
 
-    async showTodos(url) {
-        try {
-            let data = await getJSON(url)
-            todo1.render(data)
-        } catch (err) {
-            console.log(err)
-        }
+    showTodos(url) {
+        $.ajax(url)
+            .done(function (data) {
+                todo1.render(data);
+            })
+            .fail(function (err) {
+                console.log("error", err);
+            })
     }
 
     render(arr) {
@@ -121,55 +55,62 @@ class TodoList {
             if (!el) {
                 return;
             }
-            if (el.complited === true) {
+            if (JSON.parse(el.complited) === true) {
                 lis += `<li  class="active" data-status="${el.complited}" data-id="${el.id}">${el.task}<button class = "set-status">Change status</button><button class="delete-task">Delete</button></li>`;
-            } else if (el.complited === false) {
+            } else if (JSON.parse(el.complited) === false) {
                 lis += `<li  class="no-active" data-status="${el.complited}" data-id="${el.id}">${el.task}<button class = "set-status">Change status</button><button class="delete-task">Delete</button></li>`;
             }
         }
-        this.el.innerHTML = lis;
+        $list.html(lis);
     }
 
     changeStatus(task) {
-        task.complited = !task.complited;
-        return task
+        task.complited = !JSON.parse(task.complited);
+        return JSON.stringify(task)
     }
 
-    async deleteTask(url, id) {
-        try {
-            await deleteJSON(url + "/" + id)
-        } catch (err) {
-            console.log(err)
-        }
+    deleteTask(url, id) {
+        $.ajax({
+            url: $url + `/` + id,
+            type: 'DELETE',
+            dataType: 'json',
+        });
     }
 }
 
+let todo1 = new TodoList($list);
+todo1.showTodos($url)
+
 class Task {
     constructor() {
-        this.task = input.value;
+        this.task = $input.val();
         this.complited = false;
     }
 
-    async addNewTask(url, json) {
-        try {
-            let res = await saveJSON(url, json)
-            list.insertAdjacentHTML("beforeend", `<li  class="no-active" data-status="${res.complited}" data-id="${res.id}">${res.task}<button class = "set-status">Change status</button><button class="delete-task">Delete</button></li>`)
-        } catch (err) {
-            console.log(err)
-        }
+    addNewTask(url, data) {
+        $.ajax({
+            url: $url,
+            method: 'post',
+            dataType: 'json',
+            data: new Task(),
+            success: function (data) {
+                $list.append($(`<li  class="no-active" data-status="${data.complited}" data-id="${data.id}">${data.task}<button class = "set-status">Change status</button><button class="delete-task">Delete</button></li>`));
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        });
+
     }
 }
 
 let task = new Task()
-let todo1 = new TodoList(list);
-todo1.showTodos(url)
-form.addEventListener('click', function (e) {
-    if (e.target === btnCreate) {
-        if (input.value !== '') {
-            let json = JSON.stringify(new Task())
-            task.addNewTask(url, json)
-            input.value = ''
-            e.preventDefault();
-        }
+
+$btn.on('click', function (e) {
+    if ($input.val() !== '') {
+        let json = JSON.stringify(new Task())
+        task.addNewTask($url, json)
+        $input.val('')
+        e.preventDefault();
     }
 })
