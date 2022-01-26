@@ -18,25 +18,23 @@ class TodoList {
         })
     }
 
-    changeComplited(url, id) {
-        $.ajax($url + "/" + id)
+    async changeComplited(url, id) {
+        let task = await $.ajax($url + "/" + id)
             .done(function (data) {
                 todo1.changeStatus(data)
-                $.ajax({
-                    type: "PUT",
-                    url: $url + "/" + id,
-                    data: data,
-                    success: function (data) {
-                        $.ajax($url)
-                            .done(function (data) {
-                                todo1.render(data)
-                            })
-                    },
-                    error: function (err) {
-                    }
-                });
             });
-
+        await $.ajax({
+            type: "PUT",
+            url: $url + "/" + id,
+            data: task,
+        });
+        await $.ajax($url)
+            .done(function (data) {
+                todo1.render(data)
+            })
+            .fail(function (err) {
+                console.log("error", err);
+            })
     }
 
     showTodos(url) {
