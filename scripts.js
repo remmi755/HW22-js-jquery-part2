@@ -66,7 +66,6 @@ class TodoList {
 
     changeStatus(task) {
         task.complited = !JSON.parse(task.complited);
-        return JSON.stringify(task)
     }
 
     deleteTask(url, id) {
