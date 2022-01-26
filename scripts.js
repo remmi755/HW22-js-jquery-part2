@@ -35,7 +35,9 @@ class TodoList {
             .done(function (data) {
                 todo1.render(data)
             })
-
+            .fail(function (err) {
+                console.log("error", err);
+            })
     }
 
     showTodos(url) {
