@@ -106,7 +106,7 @@ let task = new Task()
 
 $btn.on('click', function (e) {
     if ($input.val() !== '') {
-        let json = JSON.stringify(new Task())
+        let json = JSON.stringify(task)
         task.addNewTask($url, json)
         $input.val('')
         e.preventDefault();
